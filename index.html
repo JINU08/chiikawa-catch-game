@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>치이카와 잡기! - 귀여운 친구들을 잡아보자</title>
+  <meta name="description" content="치이카와(10점), 하치와레(20점), 우사기(50점)가 쏙쏙 튀어나오는 귀엽고 신나는 2D 캐주얼 치이카와 잡기 게임! 콕콕 터치해서 최고 점수에 도전하세요.">
+  <link rel="stylesheet" href="style.css">
+  <!-- 구글 웹폰트: 둥글둥글 귀여운 한국어 폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- 배경 일러스트 레이어: 치이카와 삼총사 (사용자 제공 이미지) -->
+  <div class="background-friends-layer" aria-hidden="true"></div>
+
+  <!-- 배경 장식: 둥실둥실 파스텔 구름과 별 -->
+  <div class="sky-decorations" aria-hidden="true">
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+    <div class="deco-star star-1">✨</div>
+    <div class="deco-star star-2">🌸</div>
+    <div class="deco-star star-3">⭐</div>
+  </div>
+
+  <main class="game-container" id="gameApp">
+    <!-- 헤더 섹션 -->
+    <header class="game-header">
+      <div class="sound-control-wrapper">
+        <button id="soundToggleBtn" class="sound-btn" aria-label="효과음 켜기/끄기" title="소리 켜기/끄기">
+          <span class="sound-icon" id="soundIcon">🔊</span>
+          <span class="sound-text">소리 켬</span>
+        </button>
+      </div>
+
+      <h1 class="game-title">
+        <span class="title-sparkle">🌸</span>
+        치이카와 잡기!
+        <span class="title-sparkle">💖</span>
+      </h1>
+      <p class="game-subtitle" id="gameNotice">귀여운 친구들을 잡아보자!</p>
+
+      <!-- 난이도 선택 버튼 (쉬움 45초, 보통 30초, 어려움 30초) -->
+      <div class="difficulty-selector" id="difficultySelector" role="group" aria-label="게임 난이도 선택">
+        <button class="diff-btn" data-difficulty="easy" title="느긋하게 즐기기 (45초)">
+          🌱 쉬움 (45초)
+        </button>
+        <button class="diff-btn active" data-difficulty="normal" title="기본 속도 (30초)">
+          ⭐ 보통 (30초)
+        </button>
+        <button class="diff-btn" data-difficulty="hard" title="빠른 손가락 도전! (30초)">
+          🔥 어려움 (30초)
+        </button>
+      </div>
+    </header>
+
+    <!-- 게임 상태 바 (현재 점수, 남은 시간, 난이도별 최고 점수) -->
+    <section class="scoreboard-section" aria-label="게임 현황">
+      <div class="score-card current-score-card">
+        <span class="card-label">현재 점수</span>
+        <div class="card-value-box">
+          <span class="card-value" id="currentScore">0</span>
+          <span class="score-unit">점</span>
+        </div>
+      </div>
+
+      <div class="score-card timer-card" id="timerCard">
+        <span class="card-label">남은 시간</span>
+        <div class="card-value-box">
+          <span class="card-value" id="timeLeft">30</span>
+          <span class="score-unit">초</span>
+        </div>
+        <div class="timer-bar-container">
+          <div class="timer-bar" id="timerProgressBar"></div>
+        </div>
+      </div>
+
+      <div class="score-card high-score-card">
+        <span class="card-label"><span id="highScoreDiffLabel">보통</span> 최고 점수 🏆</span>
+        <div class="card-value-box">
+          <span class="card-value" id="highScore">0</span>
+          <span class="score-unit">점</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3x3 치이카와 친구들 게임판 -->
+    <section class="board-wrapper" aria-label="치이카와 게임판">
+      <div class="game-board" id="gameBoard">
+        <!-- 9개의 구멍 (JavaScript에서 60% 치이카와, 30% 하치와레, 10% 우사기로 무작위 전환) -->
+        <div class="hole" data-index="0">
+          <div class="hole-mound-back"></div>
+          <div class="mole-container">
+            <div class="character-target char-chiikawa" role="button" aria-label="치이카와 캐릭터" tabindex="0">
+              <div class="char-sprite-wrap"></div>
+            </div>
+          </div>
+          <div class="hole-mound-front"></div>
+        </div>
+
+        <div class="hole" data-index="1">
+          <div class="hole-mound-back"></div>
+          <div class="mole-container">
+            <div class="character-target char-hachiware" role="button" aria-label="치이카와 캐릭터" tabindex="0">
+              <div class="char-sprite-wrap"></div>
+            </div>
+          </div>
+          <div class="hole-mound-front"></div>
+        </div>
+
+        <div class="hole" data-index="2">
+          <div class="hole-mound-back"></div>
+          <div class="mole-container">
+            <div class="character-target char-usagi" role="button" aria-label="치이카와 캐릭터" tabindex="0">
+              <div class="char-sprite-wrap"></div>
+            </div>
+          </div>
+          <div class="hole-mound-front"></div>
+        </div>
+
+        <div class="hole" data-index="3">
+          <div class="hole-mound-back"></div>
+          <div class="mole-container">
+            <div class="character-target char-chiikawa" role="button" aria-label="치이카와 캐릭터" tabindex="0">
+              <div class="char-sprite-wrap"></div>
+            </div>
+          </div>
+          <div class="hole-mound-front"></div>
+        </div>
+
+        <div class="hole" data-index="4">
+          <div class="hole-mound-back"></div>
+          <div class="mole-container">
+            <div class="character-target char-hachiware" role="button" aria-label="치이카와 캐릭터" tabindex="0">
+              <div class="char-sprite-wrap"></div>
+            </div>
+          </div>
+          <div class="hole-mound-front"></div>
+        </div>
+
+        <div class="hole" data-index="5">
+          <div class="hole-mound-back"></div>
+          <div class="mole-container">
+            <div class="character-target char-usagi" role="button" aria-label="치이카와 캐릭터" tabindex="0">
+              <div class="char-sprite-wrap"></div>
+            </div>
+          </div>
+          <div class="hole-mound-front"></div>
+        </div>
+
+        <div class="hole" data-index="6">
+          <div class="hole-mound-back"></div>
+          <div class="mole-container">
+            <div class="character-target char-chiikawa" role="button" aria-label="치이카와 캐릭터" tabindex="0">
+              <div class="char-sprite-wrap"></div>
+            </div>
+          </div>
+          <div class="hole-mound-front"></div>
+        </div>
+
+        <div class="hole" data-index="7">
+          <div class="hole-mound-back"></div>
+          <div class="mole-container">
+            <div class="character-target char-hachiware" role="button" aria-label="치이카와 캐릭터" tabindex="0">
+              <div class="char-sprite-wrap"></div>
+            </div>
+          </div>
+          <div class="hole-mound-front"></div>
+        </div>
+
+        <div class="hole" data-index="8">
+          <div class="hole-mound-back"></div>
+          <div class="mole-container">
+            <div class="character-target char-usagi" role="button" aria-label="치이카와 캐릭터" tabindex="0">
+              <div class="char-sprite-wrap"></div>
+            </div>
+          </div>
+          <div class="hole-mound-front"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 캐릭터별 점수표 섹션 (요구사항 5번: 게임 화면 아래 점수표 추가) -->
+    <section class="score-table-section" aria-label="캐릭터별 점수표">
+      <div class="score-table-header">
+        <span class="score-table-icon">📋</span>
+        <h2 class="score-table-title">캐릭터별 획득 점수 & 출현 안내</h2>
+      </div>
+      <div class="score-cards-grid">
+        <!-- 치이카와 카드 (10점, 60%, 오래 머묾) -->
+        <div class="char-info-card chiikawa-card" title="치이카와: 10점 (등장 확률 60%)">
+          <div class="char-avatar-box">
+            <svg class="char-mini-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="28" cy="32" r="12" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+              <circle cx="28" cy="32" r="7" fill="#FFD1DC"/>
+              <circle cx="72" cy="32" r="12" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+              <circle cx="72" cy="32" r="7" fill="#FFD1DC"/>
+              <ellipse cx="50" cy="62" rx="38" ry="34" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+              <circle cx="36" cy="52" r="4.5" fill="#1E293B"/>
+              <circle cx="34.5" cy="50.5" r="1.6" fill="#FFF"/>
+              <circle cx="64" cy="52" r="4.5" fill="#1E293B"/>
+              <circle cx="62.5" cy="50.5" r="1.6" fill="#FFF"/>
+              <ellipse cx="26" cy="60" rx="6" ry="4" fill="#FFAEBC" opacity="0.8"/>
+              <ellipse cx="74" cy="60" rx="6" ry="4" fill="#FFAEBC" opacity="0.8"/>
+              <path d="M45 61 Q47.5 64 50 61 Q52.5 64 55 61" stroke="#475569" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+          <div class="char-info-details">
+            <div class="char-name-row">
+              <span class="char-name">치이카와</span>
+              <span class="char-score-badge badge-10">+10점</span>
+            </div>
+            <div class="char-rate-tag">등장 확률 60%</div>
+            <div class="char-desc">오랫동안 머물러요 🤍</div>
+          </div>
+        </div>
+
+        <!-- 하치와레 카드 (20점, 30%, 보통 속도) -->
+        <div class="char-info-card hachiware-card" title="하치와레: 20점 (등장 확률 30%)">
+          <div class="char-avatar-box">
+            <svg class="char-mini-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 40 L30 18 L42 34 Z" fill="#5BA4E6" stroke="#3B82F6" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M80 40 L70 18 L58 34 Z" fill="#5BA4E6" stroke="#3B82F6" stroke-width="1.8" stroke-linejoin="round"/>
+              <ellipse cx="50" cy="62" rx="38" ry="34" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+              <path d="M15 58 C15 36 28 26 50 36 C72 26 85 36 85 58 C85 52 70 34 50 44 C30 34 15 52 15 58 Z" fill="#5BA4E6"/>
+              <circle cx="36" cy="52" r="4.5" fill="#1E293B"/>
+              <circle cx="34.5" cy="50.5" r="1.6" fill="#FFF"/>
+              <circle cx="64" cy="52" r="4.5" fill="#1E293B"/>
+              <circle cx="62.5" cy="50.5" r="1.6" fill="#FFF"/>
+              <ellipse cx="26" cy="60" rx="6" ry="4" fill="#FFAEBC" opacity="0.8"/>
+              <ellipse cx="74" cy="60" rx="6" ry="4" fill="#FFAEBC" opacity="0.8"/>
+              <path d="M44 61 Q47 64 50 61 Q53 64 56 61" stroke="#334155" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+          <div class="char-info-details">
+            <div class="char-name-row">
+              <span class="char-name">하치와레</span>
+              <span class="char-score-badge badge-20">+20점</span>
+            </div>
+            <div class="char-rate-tag">등장 확률 30%</div>
+            <div class="char-desc">보통 속도로 사라져요 💙</div>
+          </div>
+        </div>
+
+        <!-- 우사기 카드 (50점, 10%, 짧게 나타남) -->
+        <div class="char-info-card usagi-card" title="우사기: 50점 (등장 확률 10%)">
+          <div class="char-avatar-box">
+            <svg class="char-mini-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <g transform="rotate(-6 35 25)">
+                <ellipse cx="35" cy="18" rx="7" ry="16" fill="#FFF176" stroke="#F6E05E" stroke-width="1.6"/>
+                <ellipse cx="35" cy="18" rx="3.5" ry="10" fill="#FFD1DC"/>
+              </g>
+              <g transform="rotate(6 65 25)">
+                <ellipse cx="65" cy="18" rx="7" ry="16" fill="#FFF176" stroke="#F6E05E" stroke-width="1.6"/>
+                <ellipse cx="65" cy="18" rx="3.5" ry="10" fill="#FFD1DC"/>
+              </g>
+              <ellipse cx="50" cy="62" rx="38" ry="34" fill="#FFF176" stroke="#F6E05E" stroke-width="2"/>
+              <circle cx="36" cy="52" r="4.2" fill="#1E293B"/>
+              <circle cx="34.8" cy="50.5" r="1.5" fill="#FFF"/>
+              <circle cx="64" cy="52" r="4.2" fill="#1E293B"/>
+              <circle cx="62.8" cy="50.5" r="1.5" fill="#FFF"/>
+              <ellipse cx="26" cy="60" rx="6" ry="4" fill="#FF8A80" opacity="0.85"/>
+              <ellipse cx="74" cy="60" rx="6" ry="4" fill="#FF8A80" opacity="0.85"/>
+              <path d="M44 60 L50 66 L56 60" stroke="#334155" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+          </div>
+          <div class="char-info-details">
+            <div class="char-name-row">
+              <span class="char-name">우사기</span>
+              <span class="char-score-badge badge-50">+50점</span>
+            </div>
+            <div class="char-rate-tag">등장 확률 10%</div>
+            <div class="char-desc">번개처럼 빠르게 쏙! 💛</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 게임 컨트롤 (시작/재시작 버튼) -->
+    <footer class="game-footer">
+      <button id="startBtn" class="game-btn primary-btn" aria-label="게임 시작">
+        <span class="btn-icon">🎮</span>
+        <span class="btn-text">게임 시작</span>
+      </button>
+      <button id="resetScoreBtn" class="game-btn secondary-btn" aria-label="최고 점수 초기화">
+        현재 난이도 최고점수 초기화
+      </button>
+    </footer>
+  </main>
+
+  <!-- 게임 종료 결과 모달창 -->
+  <div class="modal-overlay" id="resultModal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <div class="modal-badge-wrapper">
+        <div class="modal-badge" id="modalBadge">🎉</div>
+      </div>
+      <h2 class="modal-title" id="modalTitle">게임 종료!</h2>
+      
+      <!-- 선택한 난이도 뱃지 (요구사항 6번) -->
+      <div class="modal-difficulty-badge" id="modalDifficultyBadge">
+        플레이 난이도: ⭐ 보통 (30초)
+      </div>
+
+      <p class="modal-subtitle" id="modalSubtitle">정말 귀엽게 잘 잡으셨어요!</p>
+
+      <!-- 최종 점수 & 총 잡은 수 -->
+      <div class="modal-stats">
+        <div class="modal-stat-box total-score-box">
+          <span class="stat-name">최종 점수</span>
+          <span class="stat-num" id="modalFinalScore">0점</span>
+        </div>
+        <div class="modal-stat-box">
+          <span class="stat-name">잡은 총 친구들</span>
+          <span class="stat-num" id="modalMolesWhacked">0마리</span>
+        </div>
+      </div>
+
+      <!-- 캐릭터별 세부 포획 현황 (차등 점수 집계) -->
+      <div class="modal-char-breakdown" id="modalCharBreakdown">
+        <div class="breakdown-item chiikawa-bd">
+          <span class="bd-icon">🤍 치이카와</span>
+          <span class="bd-count" id="bdChiikawaCount">0마리 (+0점)</span>
+        </div>
+        <div class="breakdown-item hachiware-bd">
+          <span class="bd-icon">💙 하치와레</span>
+          <span class="bd-count" id="bdHachiwareCount">0마리 (+0점)</span>
+        </div>
+        <div class="breakdown-item usagi-bd">
+          <span class="bd-icon">💛 우사기</span>
+          <span class="bd-count" id="bdUsagiCount">0마리 (+0점)</span>
+        </div>
+      </div>
+
+      <div class="modal-comment-card">
+        <span class="comment-emoji" id="commentEmoji">⭐</span>
+        <p class="modal-comment" id="modalComment">치이카와와 친구들이 감탄했어요!</p>
+      </div>
+
+      <div class="modal-new-record" id="newRecordBanner" style="display: none;">
+        ✨ <strong>축하합니다! 최고 기록 달성!</strong> ✨
+      </div>
+
+      <div class="modal-actions">
+        <button id="restartBtn" class="game-btn primary-btn modal-btn">
+          <span class="btn-icon">🔄</span>
+          <span class="btn-text">다시 하기</span>
+        </button>
+        <button id="closeModalBtn" class="game-btn secondary-btn modal-btn">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
