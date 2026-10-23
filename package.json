@@ -1,0 +1,8 @@
+{
+  "name": "chiikawa-catch-game",
+  "version": "1.0.0",
+  "description": "귀여운 치이카와 친구들과 함께하는 2D 캐주얼 웹 게임",
+  "scripts": {
+    "start": "node dev-server.js"
+  }
+}
